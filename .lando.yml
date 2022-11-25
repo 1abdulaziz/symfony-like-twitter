@@ -1,0 +1,5 @@
+name: symfony6-hands-on
+recipe: symfony
+config:
+  webroot: public
+  php: "8.1"
