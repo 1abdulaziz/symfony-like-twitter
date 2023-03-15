@@ -1,0 +1,6 @@
+
+{% block body %}
+        <h1>{{ post.title }}</h1>
+        <p>{{ post.text }}</p>
+        <p>{{ post.created | date('d/m/Y') }}</p>
+{% endblock %}

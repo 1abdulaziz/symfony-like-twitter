@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello {{ controller_name }}!{% endblock %}
+
+{% block body %}
+
+<h1> <a href="{{ path('micro_post_add') }}">Add new post</a> </h1>
+
+    {% for post in posts %}
+{#        path #}
+        <h1> <a href="{{ path('micro_post_show', {'post': post.id}) }}">{{ post.title }}</a>
+     </h1>
+        <p>{{ post.text }}</p>
+        <p>{{ post.created | date('d/m/Y') }}</p>
+        <ul>
+            <li><a href="{{ path('micro_post_edit', {'post': post.id}) }}">Edit</a></li>
+            <li><a href="{{ path('micro_post_delete', {'post': post.id}) }}">Delete</a></li>
+        </ul>
+    {% endfor %}
+{% endblock %}
+
+
