@@ -25,3 +25,6 @@
 
 7. composer
 - lando composer require sensio/framework-extra-bundle 
+
+
+If tou need to add new field to ols Entity just run the ``` make:entity ``` command and then run ``` make:migration ``` and ``` doctrine:migrations:migrate ``` commands.
