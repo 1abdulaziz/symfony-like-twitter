@@ -2,7 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\MicroPost;
+use App\Form\CommentType;
+use App\Repository\CommentRepository;
 use App\Repository\MicroPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,7 +22,7 @@ class MicroPostController extends AbstractController
 
         return $this->render('micro_post/index.html.twig', [
             'controller_name' => 'MicroPostController',
-            'posts' => $posts->findAll()
+            'posts' => $posts->findAllWithComment()
         ]);
     }
     #[Route('/micro-post/{post}', name: 'micro_post_show')]
@@ -103,6 +106,29 @@ class MicroPostController extends AbstractController
 
         $this->addFlash('notice', 'Post was deleted');
         return $this->redirectToRoute('micro_post');
+    }
+
+    #[Route('/micro-post/{post}/comment', name: 'app_micro_post_comment')]
+    public function addComment(MicroPost $post, Request $request , CommentRepository $comments): Response
+    {
+        $form = $this->createForm(CommentType::class , new Comment());
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+           $comment = $form->getData();
+           $comment->setPost($post);
+           $comments->save($comment, true);
+
+
+            $this->addFlash('notice', 'Comment was created');
+            return $this->redirectToRoute('micro_post_show', ['post' => $post->getId()]);
+        }
+        return $this->renderForm(
+            'micro_post/comment.html.twig',
+            [
+                'form' => $form,
+                'post' => $post
+            ]
+        );
     }
 
 }

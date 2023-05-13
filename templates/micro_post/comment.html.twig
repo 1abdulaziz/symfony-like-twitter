@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Post - Add Comment {% endblock %}
+
+{% block body %}
+    {{ include('micro_post/show.html.twig',{post:post}) }}
+
+        {{ form_start(form , {'attr': {'novalidate':'novalidate'}}) }}
+<div>
+    {{ form_errors(form) }}
+</div>
+
+    <div>
+        {{ form_label(form.text , 'Please enter your comment', {'label_attr': {'class': 'form-label'}}) }}
+{{ form_widget(form.text, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.text) }}
+
+    </div>
+
+    <div>
+    <button type="submit" class="btn btn-primary">Add Comment</button>
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}

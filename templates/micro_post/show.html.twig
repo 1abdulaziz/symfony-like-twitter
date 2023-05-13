@@ -1,6 +1,22 @@
+{% extends 'base.html.twig' %}
 
 {% block body %}
+
         <h1>{{ post.title }}</h1>
         <p>{{ post.text }}</p>
         <p>{{ post.created | date('d/m/Y') }}</p>
+
+        <ul>
+                <li><a href="{{ path('micro_post_edit', {'post': post.id}) }}">Edit</a></li>
+                <li><a href="{{ path('micro_post_delete', {'post': post.id}) }}">Delete</a></li>
+                <li><a href="{{ path('app_micro_post_comment', {'post': post.id}) }}">comment</a></li>
+        </ul>
+
+
+
+        {% for comment in post.comments %}
+        <div class="comment">
+                <p>{{ comment.text }}</p>
+</div>
+        {% endfor %}
 {% endblock %}
