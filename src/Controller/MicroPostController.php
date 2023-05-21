@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Entity\MicroPost;
 use App\Form\CommentType;
+use App\Form\MicroPostType;
 use App\Repository\CommentRepository;
 use App\Repository\MicroPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,22 +39,13 @@ class MicroPostController extends AbstractController
     public function add(Request $request , EntityManagerInterface $entityManager): Response
     {
         $microPost = new MicroPost();
-        $form = $this->createFormBuilder($microPost)
-            ->add('title')
-            ->add('text')
-            ->add('submit', SubmitType::class, [
-                'label' => 'Create Post'
-            ])
-            ->getForm();
+        $form = $this->createForm(MicroPostType::class , $microPost);
 
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
             $post = $form->getData();
             $post->setCreated(new \DateTime());
             $entityManager->persist($post);
-
-
             $entityManager->flush();
 
             $this->addFlash('notice', 'Post was created');
@@ -70,14 +62,7 @@ class MicroPostController extends AbstractController
     #[Route('/micro-post/edit/{post}', name: 'micro_post_edit')]
     public function edit(MicroPost $post, Request $request , EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createFormBuilder($post)
-            ->add('title')
-            ->add('text')
-            ->add('submit', SubmitType::class, [
-                'label' => 'Update Post'
-            ])
-            ->getForm();
-
+        $form = $this->createForm(MicroPostType::class , $post);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
