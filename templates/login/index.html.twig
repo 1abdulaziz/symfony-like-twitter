@@ -19,8 +19,9 @@
         </form>
 
 
-{#        {{ last_username }}#}
-{#        {{ error }}#}
-
-
+{# IF YOU DOINT HAVE USER #}
+    <div class="mt-4">
+        <a href="{{ path('app_register') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Don't have an account? Register</a>
+    </div>
+{# IF YOU DOINT HAVE USER #}
 {% endblock %}

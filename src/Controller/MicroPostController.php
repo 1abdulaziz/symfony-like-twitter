@@ -9,6 +9,7 @@ use App\Form\MicroPostType;
 use App\Repository\CommentRepository;
 use App\Repository\MicroPostRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MicroPostController extends AbstractController
 {
-    #[Route('/micro-post', name: 'micro_post')]
+    #[Route('/', name: 'micro_post')]
     public function index(MicroPostRepository $posts): Response
     {
 
@@ -27,6 +28,7 @@ class MicroPostController extends AbstractController
         ]);
     }
     #[Route('/micro-post/{post}', name: 'micro_post_show')]
+    #[IsGranted(MicroPost::VIEW, subject: 'post')]
     public function show(MicroPost $post): Response
     {
         return $this->render('micro_post/show.html.twig', [
@@ -36,15 +38,19 @@ class MicroPostController extends AbstractController
     }
 
     #[Route('/micro-post/add', name: 'micro_post_add', priority: 2)]
-    public function add(Request $request , EntityManagerInterface $entityManager): Response
-    {
+//    #[IsGranted("IS_AUTHENTICATED_FULLY")] // This is any one logged in can add a post
+    #[IsGranted("ROLE_VERIFIED")] // This is any one logged in and verified can add a post
+    public function add(Request $request , EntityManagerInterface $entityManager): Response {
+        // hot to get the current user
+        $user = $this->getUser();
+
         $microPost = new MicroPost();
         $form = $this->createForm(MicroPostType::class , $microPost);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $post = $form->getData();
-            $post->setCreated(new \DateTime());
+            $post->setAuthor($user);
             $entityManager->persist($post);
             $entityManager->flush();
 
@@ -60,6 +66,7 @@ class MicroPostController extends AbstractController
     }
 
     #[Route('/micro-post/edit/{post}', name: 'micro_post_edit')]
+    #[IsGranted(MicroPost::EDIT, subject: 'post')]
     public function edit(MicroPost $post, Request $request , EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(MicroPostType::class , $post);
@@ -67,9 +74,7 @@ class MicroPostController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $post = $form->getData();
-            $post->setCreated(new \DateTime());
             $entityManager->persist($post);
-
 
             $entityManager->flush();
 
@@ -94,6 +99,7 @@ class MicroPostController extends AbstractController
     }
 
     #[Route('/micro-post/{post}/comment', name: 'app_micro_post_comment')]
+    #[IsGranted('ROLE_COMMENTER')]
     public function addComment(MicroPost $post, Request $request , CommentRepository $comments): Response
     {
         $form = $this->createForm(CommentType::class , new Comment());
@@ -101,6 +107,7 @@ class MicroPostController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
            $comment = $form->getData();
            $comment->setPost($post);
+           $comment->setAuther($this->getUser());
            $comments->save($comment, true);
 
 

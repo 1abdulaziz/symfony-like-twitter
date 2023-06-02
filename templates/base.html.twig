@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark">
+<html>
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
@@ -29,14 +29,24 @@
             {% endblock %}
         </div>
         <div class="text-right">
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <div class="text-sm text-gray-400 dark:text-gray-500">
+                <a href="{{ path('micro_post_add') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Create Post
+                </a>
+                <a href="{{ path('app_logout') }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    Logout
+                </a>
+            </div>
+            {% else %}
             <div class="text-sm text-gray-400 dark:text-gray-500">
                 <a href="{{ path('app_login') }}" class="">Login</a>
+
             </div>
-            <div class="text-sm text-gray-400 dark:text-gray-500">
-            <a href="{{ path('micro_post_add') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Create Post
-            </a>
-            </div>
+                <div class="text-sm text-gray-400 dark:text-gray-500">
+                    <a href="{{ path('app_register') }}" class="">Register</a>
+                </div>
+            {% endif %}
         </div>
     </div>
 

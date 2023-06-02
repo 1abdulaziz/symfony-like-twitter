@@ -3,3 +3,10 @@ recipe: symfony
 config:
   webroot: public
   php: "8.1"
+
+
+# mailhog st password
+services:
+  mailhog:
+    type: mailhog
+    portforward: '1080'
