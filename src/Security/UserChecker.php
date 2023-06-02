@@ -4,6 +4,7 @@ namespace App\Security;
 
 
 use App\Entity\User;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AccountStatusException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
@@ -17,16 +18,16 @@ class UserChecker implements UserCheckerInterface
      * @throws AccountStatusException
      */
     public function checkPreAuth(UserInterface $user){
+        $now = new \DateTime();
 
-        if (NULL == $user->getBannedUntil()) {
+        if (null === $user->getBannedUntil()) {
             return;
         }
 
-        $now = new \DateTime();
-
         if ($now < $user->getBannedUntil()) {
-            throw new AccessDeniedException('This user is banned until ' . $user->getBannedUntil()->format('Y-m-d H:i:s'));
+            throw new AccessDeniedHttpException('You are banned until ' . $user->getBannedUntil()->format('Y-m-d H:i:s'));
         }
+
 
 
     }
