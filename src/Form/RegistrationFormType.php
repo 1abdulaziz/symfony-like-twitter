@@ -54,6 +54,10 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
+            ->add('userProfile', UserProfileType::class, [
+                'label' => false,
+                'required' => false,
+            ])
         ;
     }
 

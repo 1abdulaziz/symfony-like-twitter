@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Comment;
 use App\Entity\MicroPost;
+use App\Entity\User;
 use App\Form\CommentType;
 use App\Form\MicroPostType;
 use App\Repository\CommentRepository;
@@ -18,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MicroPostController extends AbstractController
 {
-    #[Route('/', name: 'micro_post')]
+    #[Route('/micro-post', name: 'micro_post')]
     public function index(MicroPostRepository $posts): Response
     {
 
@@ -27,14 +28,40 @@ class MicroPostController extends AbstractController
             'posts' => $posts->findAllWithComment()
         ]);
     }
-    #[Route('/micro-post/{post}', name: 'micro_post_show')]
-    #[IsGranted(MicroPost::VIEW, subject: 'post')]
-    public function show(MicroPost $post): Response
+
+    #[Route('/micro-post/top-liked', name: 'app_micro_post_topliked')]
+    public function topLiked(MicroPostRepository $posts): Response
     {
-        return $this->render('micro_post/show.html.twig', [
-            'controller_name' => 'MicroPostController',
-            'post' => $post
+
+        return $this->render('micro_post/top_liked.html.twig', [
+            'posts' => $posts->findAllWithMinLikes(2)
         ]);
+    }
+
+    #[Route('/micro-post/follows', name: 'app_micro_post_follows')]
+    #[IsGranted("IS_AUTHENTICATED_FULLY")]
+    public function follows(MicroPostRepository $posts): Response
+    {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        return $this->render('micro_post/follows.html.twig', [
+            'controller_name' => 'MicroPostController',
+            'posts' => $posts->findAllByAuthors(
+                $currentUser->getFollows()
+            )
+        ]);
+    }
+
+    #[Route('/micro-post/{post}', name: 'micro_post_show')]
+    #[IsGranted(MicroPost::VIEW, 'post')]
+    public function showOne(MicroPost $post): Response
+    {
+        return $this->render(
+            'micro_post/show.html.twig',
+            [
+                'post' => $post,
+            ]
+        );
     }
 
     #[Route('/micro-post/add', name: 'micro_post_add', priority: 2)]
@@ -65,26 +92,38 @@ class MicroPostController extends AbstractController
         );
     }
 
-    #[Route('/micro-post/edit/{post}', name: 'micro_post_edit')]
-    #[IsGranted(MicroPost::EDIT, subject: 'post')]
-    public function edit(MicroPost $post, Request $request , EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(MicroPostType::class , $post);
+    #[Route('/micro-post/{post}/edit', name: 'micro_post_edit')]
+    #[IsGranted(MicroPost::EDIT, 'post')]
+    public function edit(
+        MicroPost $post,
+        Request $request,
+        MicroPostRepository $posts
+    ): Response {
+        $form = $this->createForm(
+            MicroPostType::class,
+            $post
+        );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $post = $form->getData();
-            $entityManager->persist($post);
+            $posts->add($post, true);
 
-            $entityManager->flush();
+            // Add a flash
+            $this->addFlash(
+                'success',
+                'Your micro post have been updated.'
+            );
 
-            $this->addFlash('notice', 'Post was updated');
             return $this->redirectToRoute('micro_post');
+            // Redirect
         }
+
         return $this->renderForm(
             'micro_post/edit.html.twig',
             [
-                'form' => $form
+                'form' => $form,
+                'post' => $post
             ]
         );
     }
